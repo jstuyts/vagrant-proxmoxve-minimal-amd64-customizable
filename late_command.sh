@@ -13,10 +13,7 @@ chown -R vagrant:vagrant /home/vagrant/.ssh
 # speed up ssh
 echo "UseDNS no" >> /etc/ssh/sshd_config
 
-# Install chef from omnibus
-curl -L https://www.getchef.com/chef/install.sh | bash
-
-# display login promt after boot
+# display login prompt after boot
 sed "s/quiet splash//" /etc/default/grub > /tmp/grub
 sed "s/GRUB_TIMEOUT=[0-9]/GRUB_TIMEOUT=0/" /tmp/grub > /etc/default/grub
 update-grub

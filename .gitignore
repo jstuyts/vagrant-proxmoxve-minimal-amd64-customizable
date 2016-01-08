@@ -1,8 +1,11 @@
+.idea/
 build/
-test/
 iso/
 
 .DS_Store
 
+PowerShellHereStartup.ps1
+
 *.box
+*.iml
 *.sw?

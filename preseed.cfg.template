@@ -1,17 +1,17 @@
 ### Localization
-d-i debian-installer/locale string en_US
-d-i debian-installer/language string en
-d-i debian-installer/country string US
-d-i debian-installer/locale string en_US.UTF-8
-d-i localechooser/supported-locales multiselect en_US.UTF-8
+d-i debian-installer/locale string {LanguageCode}_{CountryCode}
+d-i debian-installer/language string {LanguageCode}
+d-i debian-installer/country string {CountryCode}
+d-i debian-installer/locale string {LanguageCode}_{CountryCode}.{CharacterEncodingCode}
+d-i localechooser/supported-locales multiselect {LanguageCode}_{CountryCode}.{CharacterEncodingCode}
 
 # Keyboard selection.
-d-i keyboard-configuration/xkb-keymap select us
+d-i keyboard-configuration/xkb-keymap select {KeymapCode}
 
 ### Network configuration
 d-i netcfg/choose_interface select auto
-d-i netcfg/get_hostname string vagrant-debian-jessie
-d-i netcfg/hostname string vagrant-debian-jessie
+d-i netcfg/get_hostname string vagrant-jessie-minimal-amd64-customizable
+d-i netcfg/hostname string vagrant-jessie-minimal-amd64-customizable
 d-i netcfg/get_domain string vagrantup.com
 d-i netcfg/wireless_wep string
 
@@ -33,8 +33,8 @@ d-i passwd/user-password-again password vagrant
 
 ### Clock and time zone setup
 d-i clock-setup/utc boolean true
-d-i time/zone string GMT+0
-d-i clock-setup/ntp boolean true
+d-i time/zone string {TimeZoneCode}
+d-i clock-setup/ntp boolean {MustClockBeSynchronizedUsingNtp}
 
 ### Partitioning
 d-i partman-auto/method string regular
@@ -46,8 +46,8 @@ d-i partman/confirm_nooverwrite boolean true
 d-i partman/mount_style select uuid
 
 ### Apt setup
-d-i apt-setup/non-free boolean true
-d-i apt-setup/contrib boolean true
+d-i apt-setup/non-free boolean {MustNonFreePackagesBeAvailable}
+d-i apt-setup/contrib boolean {MustContribPackagesBeAvailable}
 d-i apt-setup/services-select multiselect security, volatile
 d-i apt-setup/security_host string security.debian.org
 d-i apt-setup/volatile_host string volatile.debian.org
@@ -55,10 +55,10 @@ d-i apt-setup/volatile_host string volatile.debian.org
 ### Package selection
 tasksel tasksel/first multiselect
 
-d-i pkgsel/include string openssh-server build-essential nfs-common puppet ruby ruby-dev rubygems ssh ca-certificates curl linux-headers-amd64 virtualbox-guest-dkms virtualbox-guest-utils
+d-i pkgsel/include string openssh-server build-essential nfs-common ssh ca-certificates linux-headers-amd64 virtualbox-guest-dkms virtualbox-guest-utils {NamesOfAdditionalPackagesToInstall}
 d-i pkgsel/upgrade select safe-upgrade
 
-popularity-contest popularity-contest/participate boolean false
+popularity-contest popularity-contest/participate boolean {MustJoinPopularityContest}
 
 ### GRUB
 d-i grub-installer/only_debian boolean true
