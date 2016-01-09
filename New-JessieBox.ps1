@@ -170,7 +170,7 @@ function Wait-InstallationFinished
 
   while ( Test-RunningVirtualMachine $Name )
     {
-    Start-Sleep -Seconds 20
+    Start-Sleep -Seconds 2
     }
   }
 
