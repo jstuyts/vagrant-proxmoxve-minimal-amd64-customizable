@@ -3,30 +3,11 @@ param
   [parameter( Mandatory = $true )][hashtable]$Data
   )
 
-function coalesce
-  {
-  param
-    (
-    [parameter( Mandatory = $false )][string[]]$Values
-    )
-
-  $result = $null
-
-  $ValueIndex = 0
-  while ( $result -eq $null -and $ValueIndex -lt $Values.Length )
-    {
-    $result = $Values[ $ValueIndex ]
-    $ValueIndex += 1
-    }
-
-  $result
-  }
-
 $LanguageCode = coalesce $Data.LanguageCode, 'en'
 $CountryCode = coalesce $Data.CountryCode, 'US'
 $CharacterEncodingCode = coalesce $Data.CharacterEncodingCode, 'UTF-8'
 
-$KeymapCode = coalesce $Data.KeymapCode, 'FOO'
+$KeymapCode = coalesce $Data.KeymapCode, 'us'
 
 $TimeZoneCode = coalesce $Data.TimeZoneCode, 'GMT+0'
 $MustClockBeSynchronizedUsingNtp = coalesce $Data.MustClockBeSynchronizedUsingNtp, 'true'
@@ -79,23 +60,92 @@ d-i clock-setup/ntp boolean $MustClockBeSynchronizedUsingNtp
 ### Partitioning
 d-i partman-auto/method string regular
 d-i partman-auto/alignment string optimal
-d-i partman-auto/expert_recipe string                         \
-      root-swap ::                                            \
-              41808 41808 41808 ext4                          \
-                      `$primary{ } `$bootable{ }                \
-                      method{ format } format{ }              \
-                      use_filesystem{ } filesystem{ ext4 }    \
-                      mountpoint{ / }                         \
-              .                                               \
-              1074 1074 1074 linux-swap                       \
-                      `$primary{ }                             \
-                      method{ swap } format{ }                \
-              .                                               \
-              67 67 67 ext4                                   \
-                      `$primary{ }                             \
-                      method{ keep }                          \
-                      use_filesystem{ } filesystem{ ext4 }    \
-              .
+d-i partman-auto/disk string /dev/sda
+d-i partman-auto/expert_recipe string \
+      custom-recipe :: \"
+
+$PrimaryDisk = $Data.Disks[0]
+
+$DiskSizeInMebibytes = coalesce $PrimaryDisk.SizeInMebibytes, 2048
+
+# Remove space for the boot sector and other metadata
+$AvailableSpaceInMebibytes = $DiskSizeInMebibytes - 2
+$SpaceAllocatedByPartitionsInMebibytes = 0
+$PrimaryDisk.Partitions | ForEach-Object {
+  $Partition = $_
+
+  $IsFirstPartition = $SpaceAllocatedByPartitionsInMebibytes -eq 0
+  if ( $IsFirstPartition )
+    {
+    $AdditionalSpaceToAllocateInMebibytes = 1
+    }
+  else
+    {
+    $AdditionalSpaceToAllocateInMebibytes = 0
+"              . \"
+    }
+
+  $PreviousSpaceAllocatedByPartitionsInMebibytes = $SpaceAllocatedByPartitionsInMebibytes
+  $SpaceAllocatedByPartitionsInMebibytes += $Partition.SizeInMebibytes + $AdditionalSpaceToAllocateInMebibytes
+
+  $PreviousSpaceAllocatedByPartitionsInMegabytes = $PreviousSpaceAllocatedByPartitionsInMebibytes * 1048576 / 1000000.0
+  $SpaceAllocatedByPartitionsInMegabytes = $SpaceAllocatedByPartitionsInMebibytes * 1048576 / 1000000.0
+  $PartitionSizeForPartman = [long]( $SpaceAllocatedByPartitionsInMegabytes - $PreviousSpaceAllocatedByPartitionsInMegabytes )
+
+  switch ( $Partition.Type )
+    {
+    'filesystem'
+      {
+      $FilesystemCode = coalesce $Partition.FilesystemCode, ext4
+"              $PartitionSizeForPartman $PartitionSizeForPartman $PartitionSizeForPartman $FilesystemCode \
+                      `$primary{ } \"
+      if ( $Partition.IsBootable )
+        {
+"                      `$bootable{ } \"
+        }
+"                      method{ format } format{ } \
+                      use_filesystem{ } filesystem{ $FilesystemCode } \"
+      if ( $Partition.MountPoint -ne $null )
+        {
+"                      mountpoint{ $( $Partition.MountPoint ) } \"
+        }
+      }
+    'swap'
+      {
+"              $PartitionSizeForPartman $PartitionSizeForPartman $PartitionSizeForPartman linux-swap \
+                      `$primary{ } \
+                      method{ swap } format{ } \"
+      }
+    default
+      {
+      throw "Unknown partition type: $( $Partition.Type )."
+      }
+    }
+  if ( $Partition.Label -ne $null )
+    {
+"                      label{ $( $Partition.Label ) } \"
+    }
+}
+if ( ( $SpaceAllocatedByPartitionsInMebibytes - 1 ) -gt $AvailableSpaceInMebibytes )
+  {
+  throw "Allocated space: $( $SpaceAllocatedByPartitionsInMebibytes - 1 ) MiB, exceeds available space: $AvailableSpaceInMebibytes MiB."
+  }
+
+$IsPaddingPartitionNeededAtEnd = ( $SpaceAllocatedByPartitionsInMebibytes - 1 ) -lt $AvailableSpaceInMebibytes
+if ( $IsPaddingPartitionNeededAtEnd )
+  {
+  $SpaceLeftFreeInMebibytes = $AvailableSpaceInMebibytes - ( $SpaceAllocatedByPartitionsInMebibytes - 1 )
+  if ( $SpaceLeftFreeInMebibytes -lt 64 )
+    {
+    throw "When not completely using the disk at least 64 MiB must be left free for the padding partition. But only $SpaceLeftFreeInMebibytes MiB was left free."
+    }
+"             . \
+              67 67 67 ext4 \
+                      `$primary{ } \
+                      method{ keep } \
+                      use_filesystem{ } filesystem{ ext4 } \"
+  }
+"              .
 d-i partman-basicfilesystems/no_mount_point boolean false
 d-i partman-partitioning/confirm_write_new_label boolean true
 d-i partman/choose_partition select finish

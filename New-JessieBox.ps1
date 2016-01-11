@@ -188,6 +188,24 @@ function Copy-ToUnixItem
   Set-Content $DestinationPath $ContentsWithUnixLineEndingsAsUtf8Bytes -Encoding Byte
   }
 
+function coalesce
+  {
+  param
+    (
+    [parameter( Mandatory = $false )][string[]]$Values
+    )
+
+  $result = $null
+
+  $ValueIndex = 0
+  while ( $result -eq $null -and $ValueIndex -lt $Values.Length )
+    {
+    $result = $Values[ $ValueIndex ]
+    $ValueIndex += 1
+    }
+
+  $result
+  }
 
 # Parameter validation
 
@@ -224,8 +242,6 @@ if ( $Headless )
   {
   $StartvmParameters += '--type', 'headless'
   }
-
-$PortCountParameterName = Get-PortCountParameterName
 
 # The main script
 
@@ -284,7 +300,8 @@ if ( -not ( Test-Path $CustomIsoPath ) )
   $IsolinuxBootCatPath = Join-Path $IsolinuxFolderPath boot.cat
   Remove-Item $IsolinuxBootCatPath -Force
 
-  Copy-ToUnixItem $Definition.PostInstallationScript ( Join-Path $BuildIsoCustomFolderPath late_command.sh )
+  $PostInstallationScript = coalesce $Definition.PostInstallationScript, 'late_command.sh'
+  Copy-ToUnixItem $PostInstallationScript ( Join-Path $BuildIsoCustomFolderPath late_command.sh )
 
   # http://cdrtools.sourceforge.net/private/man/cdrecord/mkisofs.8.html
   & mkisofs `
@@ -311,8 +328,9 @@ if ( -not ( Test-VirtualMachine $Definition.Name ) )
         --register `
         --basefolder $BuildVboxFolderPath
 
+  $MemorySizeInMebibytes = coalesce $Definition.MemorySizeInMebibytes, 360
   & VBoxManage modifyvm $Definition.Name `
-        --memory 360 `
+        --memory $MemorySizeInMebibytes `
         --boot1 dvd `
         --boot2 disk `
         --boot3 none `
@@ -338,22 +356,29 @@ if ( -not ( Test-VirtualMachine $Definition.Name ) )
         --name 'SATA Controller' `
         --add sata `
         --controller IntelAhci `
-        $PortCountParameterName 1 `
+        ( Get-PortCountParameterName ) 1 `
         --hostiocache off
 
-  $DiskImagePath = Join-Path ( Join-Path $BuildVboxFolderPath $Definition.Name ) "$( $Definition.Name ).vdi"
-  & VBoxManage createhd `
-        --filename $DiskImagePath `
-        --size 40960
+  $DiskOrdinal = 0
+  $Definition.Disks | ForEach-Object {
+    $Disk = $_
 
-  & VBoxManage storageattach $Definition.Name `
-        --storagectl 'SATA Controller' `
-        --port 0 `
-        --device 0 `
-        --type hdd `
-        --medium $DiskImagePath
+    $DiskImagePath = Join-Path ( Join-Path $BuildVboxFolderPath $Definition.Name ) "$( $Definition.Name )-$DiskOrdinal.vdi"
+    $SizeInMebibytes = coalesce $Disk.SizeInMebibytes, 2048
+    & VBoxManage createhd `
+          --filename $DiskImagePath `
+          --size $SizeInMebibytes
 
-  $StartvmParameters
+    & VBoxManage storageattach $Definition.Name `
+          --storagectl 'SATA Controller' `
+          --port $DiskOrdinal `
+          --device 0 `
+          --type hdd `
+          --medium $DiskImagePath
+
+    $DiskOrdinal += 1
+  }
+
   & VBoxManage $StartvmParameters
 
   Wait-InstallationFinished $Definition.Name
