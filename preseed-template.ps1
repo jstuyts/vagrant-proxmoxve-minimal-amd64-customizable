@@ -66,7 +66,7 @@ d-i partman-auto/expert_recipe string \
 
 $PrimaryDisk = $Data.Disks[0]
 
-$DiskSizeInMebibytes = coalesce $PrimaryDisk.SizeInMebibytes, 2048
+$DiskSizeInMebibytes = coalesce $PrimaryDisk.SizeInMebibytes, 4096
 
 # Remove space for the boot sector and other metadata
 $AvailableSpaceInMebibytes = $DiskSizeInMebibytes - 2

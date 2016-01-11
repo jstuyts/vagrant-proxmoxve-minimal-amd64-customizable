@@ -4,11 +4,11 @@
     MemorySizeInMebibytes = 2048;
     Disks = @(
         @{
-            # Optional. Default: 2048
-            SizeInMebibytes = 2048;
+            # Optional. Default: 4096
+            SizeInMebibytes = 4096;
             Partitions = @(
                 @{
-                    SizeInMebibytes = 1534;
+                    SizeInMebibytes = 3582;
                     Type = 'filesystem';
                     # Optional. Default: 'ext4'
                     FilesystemCode = 'ext4';
@@ -28,8 +28,8 @@
             );
         },
         @{
-            # Optional. Default: 2048
-            SizeInMebibytes = 2048;
+            # Optional. Default: 4096
+            SizeInMebibytes = 4096;
         }
     );
 

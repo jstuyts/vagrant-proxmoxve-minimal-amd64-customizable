@@ -364,7 +364,7 @@ if ( -not ( Test-VirtualMachine $Definition.Name ) )
     $Disk = $_
 
     $DiskImagePath = Join-Path ( Join-Path $BuildVboxFolderPath $Definition.Name ) "$( $Definition.Name )-$DiskOrdinal.vdi"
-    $SizeInMebibytes = coalesce $Disk.SizeInMebibytes, 2048
+    $SizeInMebibytes = coalesce $Disk.SizeInMebibytes, 4096
     & VBoxManage createhd `
           --filename $DiskImagePath `
           --size $SizeInMebibytes
