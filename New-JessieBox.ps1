@@ -265,37 +265,7 @@ if ( -not ( Test-Path $CustomIsoPath ) )
   $CompressedInitrdPath = Join-Path $InstallationFolderPath initrd.gz
   & 7z x "-o$BuildFolderPath" $CompressedInitrdPath
 
-  $PreseedReplacements = @{
-    '{CountryCode}' = $Definition.CountryCode;
-    '{LanguageCode}' = $Definition.LanguageCode;
-    '{CharacterEncodingCode}' = $Definition.CharacterEncodingCode;
-
-    '{KeymapCode}' = $Definition.KeymapCode;
-
-    '{TimeZoneCode}' = $Definition.TimeZoneCode;
-
-    '{MustClockBeSynchronizedUsingNtp}' = $Definition.MustClockBeSynchronizedUsingNtp;
-
-    '{MustNonFreePackagesBeAvailable}' = $Definition.MustNonFreePackagesBeAvailable;
-    '{MustContribPackagesBeAvailable}' = $Definition.MustContribPackagesBeAvailable;
-
-    '{NamesOfAdditionalPackagesToInstall}' = $Definition.NamesOfAdditionalPackagesToInstall;
-
-    '{MustJoinPopularityContest}' = $Definition.MustJoinPopularityContest;
-
-    '{PostInstallationScript}' = $Definition.PostInstallationScript
-  }
-
-  Get-Content preseed.cfg.template |
-        ForEach-Object {
-          $result = $_
-
-          $PreseedReplacements.Keys | ForEach-Object {
-            $result = $result.Replace( $_, $PreseedReplacements[ $_ ] )
-            }
-
-          $result
-          } |
+  .\preseed-template.ps1 $Definition |
         Out-File ( Join-Path $BuildFolderPath preseed.cfg ) -Encoding ascii
 
   Push-Location $BuildFolderPath
