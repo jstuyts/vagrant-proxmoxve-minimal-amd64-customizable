@@ -224,8 +224,7 @@ Assert-CommandExists -ApplicationName 'Open Source for Win32 by TumaGonx Zakkum'
 
 # Load the definition
 
-$DefinitionAsString = ( Get-Content $DefinitionFile | Out-String )
-$Definition = ( Invoke-Expression $DefinitionAsString )
+$Definition = & $DefinitionFile
 
 # Environment-specific values
 
