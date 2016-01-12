@@ -69,6 +69,7 @@ $PrimaryDisk = $Data.Disks[0]
 $DiskSizeInMebibytes = coalesce $PrimaryDisk.SizeInMebibytes, 4096
 
 # Remove space for the boot sector and other metadata
+$MetadataAtFrontOfDiskSizeInMebibytes = 1
 $AvailableSpaceInMebibytes = $DiskSizeInMebibytes - 2
 $SpaceAllocatedByPartitionsInMebibytes = 0
 $PrimaryDisk.Partitions | ForEach-Object {
@@ -77,19 +78,19 @@ $PrimaryDisk.Partitions | ForEach-Object {
   $IsFirstPartition = $SpaceAllocatedByPartitionsInMebibytes -eq 0
   if ( $IsFirstPartition )
     {
-    $AdditionalSpaceToAllocateInMebibytes = 1
+    $MetadataAtFrontOfDiskSizeToAddToPreviousAllocatedSpaceInMebibytes = 0
     }
   else
     {
-    $AdditionalSpaceToAllocateInMebibytes = 0
+    $MetadataAtFrontOfDiskSizeToAddToPreviousAllocatedSpaceInMebibytes = $MetadataAtFrontOfDiskSizeInMebibytes
 "              . \"
     }
 
   $PreviousSpaceAllocatedByPartitionsInMebibytes = $SpaceAllocatedByPartitionsInMebibytes
-  $SpaceAllocatedByPartitionsInMebibytes += $Partition.SizeInMebibytes + $AdditionalSpaceToAllocateInMebibytes
+  $SpaceAllocatedByPartitionsInMebibytes += $Partition.SizeInMebibytes
 
-  $PreviousSpaceAllocatedByPartitionsInMegabytes = $PreviousSpaceAllocatedByPartitionsInMebibytes * 1048576 / 1000000.0
-  $SpaceAllocatedByPartitionsInMegabytes = $SpaceAllocatedByPartitionsInMebibytes * 1048576 / 1000000.0
+  $PreviousSpaceAllocatedByPartitionsInMegabytes = ( $PreviousSpaceAllocatedByPartitionsInMebibytes + $MetadataAtFrontOfDiskSizeToAddToPreviousAllocatedSpaceInMebibytes ) * 1048576 / 1000000.0
+  $SpaceAllocatedByPartitionsInMegabytes = ( $SpaceAllocatedByPartitionsInMebibytes + $MetadataAtFrontOfDiskSizeInMebibytes ) * 1048576 / 1000000.0
   $PartitionSizeForPartman = [long]( $SpaceAllocatedByPartitionsInMegabytes - $PreviousSpaceAllocatedByPartitionsInMegabytes )
 
   switch ( $Partition.Type )
@@ -126,15 +127,15 @@ $PrimaryDisk.Partitions | ForEach-Object {
 "                      label{ $( $Partition.Label ) } \"
     }
 }
-if ( ( $SpaceAllocatedByPartitionsInMebibytes - 1 ) -gt $AvailableSpaceInMebibytes )
+if ( $SpaceAllocatedByPartitionsInMebibytes -gt $AvailableSpaceInMebibytes )
   {
-  throw "Allocated space: $( $SpaceAllocatedByPartitionsInMebibytes - 1 ) MiB, exceeds available space: $AvailableSpaceInMebibytes MiB."
+  throw "Allocated space: $SpaceAllocatedByPartitionsInMebibytes MiB, exceeds available space: $AvailableSpaceInMebibytes MiB."
   }
 
-$IsPaddingPartitionNeededAtEnd = ( $SpaceAllocatedByPartitionsInMebibytes - 1 ) -lt $AvailableSpaceInMebibytes
+$IsPaddingPartitionNeededAtEnd = $SpaceAllocatedByPartitionsInMebibytes -lt $AvailableSpaceInMebibytes
 if ( $IsPaddingPartitionNeededAtEnd )
   {
-  $SpaceLeftFreeInMebibytes = $AvailableSpaceInMebibytes - ( $SpaceAllocatedByPartitionsInMebibytes - 1 )
+  $SpaceLeftFreeInMebibytes = $AvailableSpaceInMebibytes - $SpaceAllocatedByPartitionsInMebibytes
   if ( $SpaceLeftFreeInMebibytes -lt 64 )
     {
     throw "When not completely using the disk at least 64 MiB must be left free for the padding partition. But only $SpaceLeftFreeInMebibytes MiB was left free."
