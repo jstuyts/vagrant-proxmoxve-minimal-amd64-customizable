@@ -70,7 +70,7 @@ $DiskSizeInMebibytes = coalesce $PrimaryDisk.SizeInMebibytes, 4096
 
 # Remove space for the boot sector and other metadata
 $MetadataAtFrontOfDiskSizeInMebibytes = 1
-$AvailableSpaceInMebibytes = $DiskSizeInMebibytes - 2
+$AvailableSpaceInMebibytes = $DiskSizeInMebibytes - $MetadataAtFrontOfDiskSizeInMebibytes - 1
 $SpaceAllocatedByPartitionsInMebibytes = 0
 $PrimaryDisk.Partitions | ForEach-Object {
   $Partition = $_
