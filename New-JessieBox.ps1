@@ -27,7 +27,7 @@
     If given the VirtualBox GUI of the virtual machine will not be shown.
 
 .EXAMPLE
-    C:\PS> New-JessieBox.ps1 mem_2GiB-disk_40GiB(system_8GiB-swap_1GiB).pson 
+    C:\PS> New-JessieBox.ps1 mem_2GiB-disk_40GiB(system_8GiB-swap_1GiB).pson.ps1
     Assuming the definition file describes a box with the following characteristics:
     * 2 GiB of memory
     * 1 disk of 40 GiB
