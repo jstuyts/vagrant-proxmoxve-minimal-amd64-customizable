@@ -71,8 +71,7 @@ d-i partman-auto/disk string /dev/sda
 d-i partman-auto/expert_recipe string \
       custom-recipe :: \
               2 2 2 free \
-                      `$primary{ } \
-                      `$method{ biosgrub } \"
+                      method{ biosgrub } \"
 
 $PrimaryDisk = $Data.Disks[0]
 
@@ -99,8 +98,7 @@ $PrimaryDisk.Partitions | ForEach-Object {
     'filesystem'
       {
       $FilesystemCode = coalesce $Partition.FilesystemCode, ext4
-"              $PartitionSizeForPartman $PartitionSizeForPartman $PartitionSizeForPartman $FilesystemCode \
-                      `$primary{ } \"
+"              $PartitionSizeForPartman $PartitionSizeForPartman $PartitionSizeForPartman $FilesystemCode \"
       if ( $Partition.IsBootable )
         {
 "                      `$bootable{ } \"
@@ -115,7 +113,6 @@ $PrimaryDisk.Partitions | ForEach-Object {
     'swap'
       {
 "              $PartitionSizeForPartman $PartitionSizeForPartman $PartitionSizeForPartman linux-swap \
-                      `$primary{ } \
                       method{ swap } format{ } \"
       }
     default
@@ -145,10 +142,9 @@ if ( $IsPaddingPartitionNeededAtEnd )
     throw "When not completely using the disk at least 64 MiB must be left free for the padding partition. But only $SpaceLeftFreeInMebibytes MiB was left free."
     }
 "             . \
-              67 67 67 ext4 \
-                      `$primary{ } \
+              67 67 67 free \
                       method{ keep } \
-                      use_filesystem{ } filesystem{ ext4 } \"
+                      use_filesystem{ } filesystem{ free } \"
   }
 "              .
 d-i partman-basicfilesystems/no_mount_point boolean false
