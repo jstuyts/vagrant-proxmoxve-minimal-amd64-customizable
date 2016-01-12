@@ -8,7 +8,7 @@
             SizeInMebibytes = 4096;
             Partitions = @(
                 @{
-                    SizeInMebibytes = 3582;
+                    SizeInMebibytes = 3581;
                     Type = 'filesystem';
                     # Optional. Default: 'ext4'
                     FilesystemCode = 'ext4';

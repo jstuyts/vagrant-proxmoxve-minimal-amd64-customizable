@@ -60,36 +60,37 @@ d-i clock-setup/ntp boolean $MustClockBeSynchronizedUsingNtp
 ### Partitioning
 d-i partman-auto/method string regular
 d-i partman-auto/alignment string optimal
+d-i partman-basicfilesystems/choose_label string gpt
+d-i partman-basicfilesystems/default_label string gpt
+d-i partman-partitioning/choose_label string gpt
+d-i partman-partitioning/default_label string gpt
+d-i partman/choose_label string gpt
+d-i partman/default_label string gpt
+d-i partman-partitioning/choose_label select gpt
 d-i partman-auto/disk string /dev/sda
 d-i partman-auto/expert_recipe string \
-      custom-recipe :: \"
+      custom-recipe :: \
+              2 2 2 free \
+                      `$primary{ } \
+                      `$method{ biosgrub } \"
 
 $PrimaryDisk = $Data.Disks[0]
 
 $DiskSizeInMebibytes = coalesce $PrimaryDisk.SizeInMebibytes, 4096
 
 # Remove space for the boot sector and other metadata
-$MetadataAtFrontOfDiskSizeInMebibytes = 1
-$AvailableSpaceInMebibytes = $DiskSizeInMebibytes - $MetadataAtFrontOfDiskSizeInMebibytes - 1
+$MetadataAtFrontOfDiskSizeInMebibytes = 2
+
 $SpaceAllocatedByPartitionsInMebibytes = 0
 $PrimaryDisk.Partitions | ForEach-Object {
   $Partition = $_
 
-  $IsFirstPartition = $SpaceAllocatedByPartitionsInMebibytes -eq 0
-  if ( $IsFirstPartition )
-    {
-    $MetadataAtFrontOfDiskSizeToAddToPreviousAllocatedSpaceInMebibytes = 0
-    }
-  else
-    {
-    $MetadataAtFrontOfDiskSizeToAddToPreviousAllocatedSpaceInMebibytes = $MetadataAtFrontOfDiskSizeInMebibytes
 "              . \"
-    }
 
   $PreviousSpaceAllocatedByPartitionsInMebibytes = $SpaceAllocatedByPartitionsInMebibytes
   $SpaceAllocatedByPartitionsInMebibytes += $Partition.SizeInMebibytes
 
-  $PreviousSpaceAllocatedByPartitionsInMegabytes = ( $PreviousSpaceAllocatedByPartitionsInMebibytes + $MetadataAtFrontOfDiskSizeToAddToPreviousAllocatedSpaceInMebibytes ) * 1048576 / 1000000.0
+  $PreviousSpaceAllocatedByPartitionsInMegabytes = ( $PreviousSpaceAllocatedByPartitionsInMebibytes + $MetadataAtFrontOfDiskSizeInMebibytes ) * 1048576 / 1000000.0
   $SpaceAllocatedByPartitionsInMegabytes = ( $SpaceAllocatedByPartitionsInMebibytes + $MetadataAtFrontOfDiskSizeInMebibytes ) * 1048576 / 1000000.0
   $PartitionSizeForPartman = [long]( $SpaceAllocatedByPartitionsInMegabytes - $PreviousSpaceAllocatedByPartitionsInMegabytes )
 
@@ -127,6 +128,9 @@ $PrimaryDisk.Partitions | ForEach-Object {
 "                      label{ $( $Partition.Label ) } \"
     }
 }
+
+$AvailableSpaceInMebibytes = $DiskSizeInMebibytes - $MetadataAtFrontOfDiskSizeInMebibytes - 1
+
 if ( $SpaceAllocatedByPartitionsInMebibytes -gt $AvailableSpaceInMebibytes )
   {
   throw "Allocated space: $SpaceAllocatedByPartitionsInMebibytes MiB, exceeds available space: $AvailableSpaceInMebibytes MiB."
