@@ -58,7 +58,7 @@
     MustContribPackagesBeAvailable = 'true';
 
     # Optional. Default: <empty string>
-    NamesOfAdditionalPackagesToInstall = '';
+    NamesOfAdditionalPackagesToInstall = 'less vim';
 
     # Optional. Default: false
     MustJoinPopularityContest = 'false';
