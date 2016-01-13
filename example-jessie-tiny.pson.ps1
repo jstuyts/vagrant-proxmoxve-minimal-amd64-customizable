@@ -7,7 +7,7 @@
             # Optional. Default: 4096
             SizeInMebibytes = 4096;
             # Optional. Default: <none>
-            BiosBootPartitionLabel = 'grub';
+            BiosBootPartitionName = 'grub';
             Partitions = @(
                 @{
                     SizeInMebibytes = 2560;
@@ -19,7 +19,7 @@
                     # Optional. Default: $false
                     IsBootable = $true;
                     # Optional. Default: <none>
-                    PartitionLabel = 'host';
+                    PartitionName = 'host';
                     # Optional. Default: <none>
                     Label = 'host';
                 },
@@ -27,13 +27,13 @@
                     SizeInMebibytes = 512;
                     Type = 'swap';
                     # Optional. Default: <none>
-                    PartitionLabel = 'swap';
+                    PartitionName = 'swap';
                 },
                 @{
                     SizeInMebibytes = 1021;
                     Type = 'empty';
                     # Optional. Default: <none>
-                    PartitionLabel = 'empty';
+                    PartitionName = 'empty';
                 }
             );
         },

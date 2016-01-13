@@ -68,13 +68,13 @@ d-i partman-auto/expert_recipe string \
 
 $PrimaryDisk = $Data.Disks[0]
 
-if ( $PrimaryDisk.BiosBootPartitionLabel -eq $null )
+if ( $PrimaryDisk.BiosBootPartitionName -eq $null )
   {
   $PartedLateCommands = ''
   }
 else
   {
-  $PartedLateCommands = "name 1 $( $PrimaryDisk.BiosBootPartitionLabel ) "
+  $PartedLateCommands = "name 1 $( $PrimaryDisk.BiosBootPartitionName ) "
   }
 
 $DiskSizeInMebibytes = coalesce $PrimaryDisk.SizeInMebibytes, 4096
@@ -134,9 +134,9 @@ $PrimaryDisk.Partitions | ForEach-Object {
       }
     }
 
-  if ( $Partition.PartitionLabel -ne $null )
+  if ( $Partition.PartitionName -ne $null )
     {
-    $PartedLateCommands += "name $PartitionOrdinal $( $Partition.PartitionLabel ) "
+    $PartedLateCommands += "name $PartitionOrdinal $( $Partition.PartitionName ) "
     }
 
   $PartitionOrdinal += 1
