@@ -60,13 +60,7 @@ d-i clock-setup/ntp boolean $MustClockBeSynchronizedUsingNtp
 ### Partitioning
 d-i partman-auto/method string regular
 d-i partman-auto/alignment string optimal
-d-i partman-basicfilesystems/choose_label string gpt
-d-i partman-basicfilesystems/default_label string gpt
-d-i partman-partitioning/choose_label string gpt
 d-i partman-partitioning/default_label string gpt
-d-i partman/choose_label string gpt
-d-i partman/default_label string gpt
-d-i partman-partitioning/choose_label select gpt
 d-i partman-auto/disk string /dev/sda
 d-i partman-auto/expert_recipe string \
       custom-recipe :: \
