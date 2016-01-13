@@ -75,12 +75,22 @@ d-i partman-auto/expert_recipe string \
 
 $PrimaryDisk = $Data.Disks[0]
 
+if ( $PrimaryDisk.BiosBootPartitionLabel -eq $null )
+  {
+  $PartedLateCommands = ''
+  }
+else
+  {
+  $PartedLateCommands = "name 1 $( $PrimaryDisk.BiosBootPartitionLabel ) "
+  }
+
 $DiskSizeInMebibytes = coalesce $PrimaryDisk.SizeInMebibytes, 4096
 
 # Remove space for the boot sector and other metadata
 $MetadataAtFrontOfDiskSizeInMebibytes = 2
 
 $SpaceAllocatedByPartitionsInMebibytes = 0
+$PartitionOrdinal = 2
 $PrimaryDisk.Partitions | ForEach-Object {
   $Partition = $_
 
@@ -109,6 +119,10 @@ $PrimaryDisk.Partitions | ForEach-Object {
         {
 "                      mountpoint{ $( $Partition.MountPoint ) } \"
         }
+      if ( $Partition.Label -ne $null )
+        {
+"                      label{ $( $Partition.Label ) } \"
+        }
       }
     'swap'
       {
@@ -120,11 +134,14 @@ $PrimaryDisk.Partitions | ForEach-Object {
       throw "Unknown partition type: $( $Partition.Type )."
       }
     }
-  if ( $Partition.Label -ne $null )
+
+  if ( $Partition.PartitionLabel -ne $null )
     {
-"                      label{ $( $Partition.Label ) } \"
+    $PartedLateCommands += "name $PartitionOrdinal $( $Partition.PartitionLabel ) "
     }
-}
+
+  $PartitionOrdinal += 1
+  }
 
 $AvailableSpaceInMebibytes = $DiskSizeInMebibytes - $MetadataAtFrontOfDiskSizeInMebibytes - 1
 
@@ -145,7 +162,10 @@ if ( $IsPaddingPartitionNeededAtEnd )
               67 67 67 free \
                       method{ keep } \
                       use_filesystem{ } filesystem{ free } \"
+  $PartedLateCommands += "rm $PartitionOrdinal "
   }
+# Ensure at least one command is passed to Parted to prevent it from showing a prompt.
+$PartedLateCommands += 'quit'
 "              .
 d-i partman-basicfilesystems/no_mount_point boolean false
 d-i partman-partitioning/confirm_write_new_label boolean true
@@ -164,7 +184,7 @@ d-i apt-setup/volatile_host string volatile.debian.org
 ### Package selection
 tasksel tasksel/first multiselect
 
-d-i pkgsel/include string openssh-server build-essential nfs-common ssh ca-certificates linux-headers-amd64 virtualbox-guest-dkms virtualbox-guest-utils $NamesOfAdditionalPackagesToInstall
+d-i pkgsel/include string openssh-server build-essential nfs-common ssh ca-certificates linux-headers-amd64 virtualbox-guest-dkms virtualbox-guest-utils parted $NamesOfAdditionalPackagesToInstall
 d-i pkgsel/upgrade select safe-upgrade
 
 popularity-contest popularity-contest/participate boolean $MustJoinPopularityContest
@@ -179,4 +199,4 @@ d-i finish-install/reboot_in_progress note
 d-i debian-installer/exit/poweroff boolean true
 
 #### Advanced options
-d-i preseed/late_command string cp /cdrom/late_command.sh /target/tmp/late_command.sh && in-target chmod +x /tmp/late_command.sh && in-target /tmp/late_command.sh"
+d-i preseed/late_command string cp /cdrom/late_command.sh /target/tmp/late_command.sh && in-target parted /dev/sda $PartedLateCommands && in-target chmod +x /tmp/late_command.sh && in-target /tmp/late_command.sh"
