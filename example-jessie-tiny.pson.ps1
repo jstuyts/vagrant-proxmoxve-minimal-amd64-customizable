@@ -10,7 +10,7 @@
             BiosBootPartitionLabel = 'grub';
             Partitions = @(
                 @{
-                    SizeInMebibytes = 3581;
+                    SizeInMebibytes = 2560;
                     Type = 'filesystem';
                     # Optional. Default: 'ext4'
                     FilesystemCode = 'ext4';
@@ -28,6 +28,12 @@
                     Type = 'swap';
                     # Optional. Default: <none>
                     PartitionLabel = 'swap';
+                },
+                @{
+                    SizeInMebibytes = 1021;
+                    Type = 'empty';
+                    # Optional. Default: <none>
+                    PartitionLabel = 'empty';
                 }
             );
         },

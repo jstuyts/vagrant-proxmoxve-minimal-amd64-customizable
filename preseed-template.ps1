@@ -124,6 +124,12 @@ $PrimaryDisk.Partitions | ForEach-Object {
 "                      label{ $( $Partition.Label ) } \"
         }
       }
+    'empty'
+      {
+"              $PartitionSizeForPartman $PartitionSizeForPartman $PartitionSizeForPartman free \
+                      method{ keep } \
+                      use_filesystem{ } filesystem{ free } \"
+      }
     'swap'
       {
 "              $PartitionSizeForPartman $PartitionSizeForPartman $PartitionSizeForPartman linux-swap \
