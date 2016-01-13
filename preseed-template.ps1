@@ -13,7 +13,6 @@ $TimeZoneCode = coalesce $Data.TimeZoneCode, 'GMT+0'
 $MustClockBeSynchronizedUsingNtp = coalesce $Data.MustClockBeSynchronizedUsingNtp, 'true'
 
 $MustNonFreePackagesBeAvailable = coalesce $Data.MustNonFreePackagesBeAvailable, 'true'
-$MustContribPackagesBeAvailable = coalesce $Data.MustContribPackagesBeAvailable, 'true'
 
 $NamesOfAdditionalPackagesToInstall = coalesce $Data.NamesOfAdditionalPackagesToInstall, ''
 
@@ -176,7 +175,7 @@ d-i partman/mount_style select uuid
 
 ### Apt setup
 d-i apt-setup/non-free boolean $MustNonFreePackagesBeAvailable
-d-i apt-setup/contrib boolean $MustContribPackagesBeAvailable
+d-i apt-setup/contrib boolean true
 d-i apt-setup/services-select multiselect security, volatile
 d-i apt-setup/security_host string security.debian.org
 d-i apt-setup/volatile_host string volatile.debian.org

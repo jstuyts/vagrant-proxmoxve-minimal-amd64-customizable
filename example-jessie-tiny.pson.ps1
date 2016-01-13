@@ -64,8 +64,6 @@
 
     # Optional. Default: true
     MustNonFreePackagesBeAvailable = 'true';
-    # Optional. Default: true
-    MustContribPackagesBeAvailable = 'true';
 
     # Optional. Default: <empty string>
     NamesOfAdditionalPackagesToInstall = 'less vim';
