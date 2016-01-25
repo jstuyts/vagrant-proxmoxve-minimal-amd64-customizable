@@ -2,6 +2,19 @@
     Name = 'example-jessie-tiny-amd64';
     # Optional. Default: 360
     MemorySizeInMebibytes = 2048;
+
+    # Optional. Default: $false
+    #
+    # It is best to use the "vagrant-vbguest" plug-in as this will install a
+    # version of the guest additions that matches the version of VirtualBox:
+    #     https://github.com/dotless-de/vagrant-vbguest
+    #
+    # If you do install the guest additions from the Debian repositories, then
+    # it is best to prevent the "vagrant-vbguest" plug-in from trying to
+    # upgrade the guest additions. Add the following to your "Vagrantfile":
+    #     config.vbguest.no_install = true
+    InstallGuestAddtions = $false;
+
     Disks = @(
         @{
             # Optional. Default: 4096

@@ -3,6 +3,12 @@ param
   [parameter( Mandatory = $true )][hashtable]$Data
   )
 
+$NamesOfPackagesToInstallForGuestAdditions = ''
+if ( $Data.InstallGuestAddtions )
+  {
+  $NamesOfPackagesToInstallForGuestAdditions = 'build-essential linux-headers-amd64 virtualbox-guest-dkms virtualbox-guest-utils'
+  }
+
 $LanguageCode = coalesce $Data.LanguageCode, 'en'
 $CountryCode = coalesce $Data.CountryCode, 'US'
 $CharacterEncodingCode = coalesce $Data.CharacterEncodingCode, 'UTF-8'
@@ -183,7 +189,7 @@ d-i apt-setup/volatile_host string volatile.debian.org
 ### Package selection
 tasksel tasksel/first multiselect
 
-d-i pkgsel/include string openssh-server build-essential nfs-common ssh ca-certificates linux-headers-amd64 virtualbox-guest-dkms virtualbox-guest-utils parted $NamesOfAdditionalPackagesToInstall
+d-i pkgsel/include string openssh-server nfs-common ssh ca-certificates parted bzip2 $NamesOfPackagesToInstallForGuestAdditions $NamesOfAdditionalPackagesToInstall
 d-i pkgsel/upgrade select safe-upgrade
 
 popularity-contest popularity-contest/participate boolean $MustJoinPopularityContest
