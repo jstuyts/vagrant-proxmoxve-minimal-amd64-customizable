@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-    Creates a Vagrant box for Debian 8 (Jessie).
+    Creates a Vagrant box for Proxmox VE 4.
 
 .DESCRIPTION
-    The New-JessieBox function creates a Vagrant box with a minimal installation of
-    Debian 8 (Jessie). The box is customizable using the definition file, which is
-    written in PowerShell object notation (PSON).
+    The New-ProxmoxVEBox function creates a Vagrant box with a minimal
+    installation of Proxmox VE 4. The box is customizable using the definition
+    file, which is written in PowerShell object notation (PSON).
 
     The following things can be customized in the definition file:
     * The name of the box.
@@ -27,15 +27,15 @@
     If given the VirtualBox GUI of the virtual machine will not be shown.
 
 .EXAMPLE
-    C:\PS> New-JessieBox.ps1 mem_2GiB-disk_40GiB(system_8GiB-swap_1GiB).pson.ps1
+    C:\PS> New-ProxmoxVEBox.ps1 mem_2GiB-disk_40GiB(system_8GiB-swap_1GiB).pson.ps1
     Assuming the definition file describes a box with the following characteristics:
     * 2 GiB of memory
     * 1 disk of 40 GiB
     * A system partition of 8 GiB
     * A swap partition of 1 GiB
 
-    New-JessieBox will create a VirtualBox virtual machine, install Jessie on it and
-    package the virtual machine as a Vagrant box.
+    New-ProxmoxVEBox will create a VirtualBox virtual machine, install
+    Proxmox VE on it and package the virtual machine as a Vagrant box.
 #>
 param
   (
@@ -301,6 +301,8 @@ if ( -not ( Test-Path $CustomIsoPath ) )
 
   $PostInstallationScript = coalesce $Definition.PostInstallationScript, 'late_command.sh'
   Copy-ToUnixItem $PostInstallationScript ( Join-Path $BuildIsoCustomFolderPath late_command.sh )
+  Copy-ToUnixItem rc.local ( Join-Path $BuildIsoCustomFolderPath rc.local )
+  Copy-ToUnixItem install_pve.sh ( Join-Path $BuildIsoCustomFolderPath install_pve.sh )
 
   # http://cdrtools.sourceforge.net/private/man/cdrecord/mkisofs.8.html
   & mkisofs `
@@ -363,7 +365,7 @@ if ( -not ( Test-VirtualMachine $Definition.Name ) )
     $Disk = $_
 
     $DiskImagePath = Join-Path ( Join-Path $BuildVboxFolderPath $Definition.Name ) "$( $Definition.Name )-$DiskOrdinal.vdi"
-    $SizeInMebibytes = coalesce $Disk.SizeInMebibytes, 4096
+    $SizeInMebibytes = coalesce $Disk.SizeInMebibytes, 16384
     & VBoxManage createhd `
           --filename $DiskImagePath `
           --size $SizeInMebibytes

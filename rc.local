@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sleep 60 && /root/install_pve.sh >>/root/install_pve.out.txt 2>>/root/install_pve.err.txt &
+
+exit 0

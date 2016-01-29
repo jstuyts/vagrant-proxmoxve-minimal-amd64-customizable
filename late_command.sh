@@ -17,10 +17,3 @@ echo "UseDNS no" >> /etc/ssh/sshd_config
 sed "s/quiet splash//" /etc/default/grub > /tmp/grub
 sed "s/GRUB_TIMEOUT=[0-9]/GRUB_TIMEOUT=0/" /tmp/grub > /etc/default/grub
 update-grub
-
-# clean up
-apt-get clean
-
-# Zero free space to aid VM compression
-dd if=/dev/zero of=/EMPTY bs=1M
-rm -f /EMPTY

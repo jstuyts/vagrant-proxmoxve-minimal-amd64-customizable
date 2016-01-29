@@ -36,8 +36,8 @@ d-i keyboard-configuration/xkb-keymap select $KeymapCode
 
 ### Network configuration
 d-i netcfg/choose_interface select auto
-d-i netcfg/get_hostname string vagrant-jessie-minimal-amd64-customizable
-d-i netcfg/hostname string vagrant-jessie-minimal-amd64-customizable
+d-i netcfg/get_hostname string proxmoxve
+d-i netcfg/hostname string proxmoxve
 d-i netcfg/get_domain string vagrantup.com
 d-i netcfg/wireless_wep string
 
@@ -83,7 +83,7 @@ else
   $PartedLateCommands = "name 1 $( $PrimaryDisk.BiosBootPartitionName ) "
   }
 
-$DiskSizeInMebibytes = coalesce $PrimaryDisk.SizeInMebibytes, 4096
+$DiskSizeInMebibytes = coalesce $PrimaryDisk.SizeInMebibytes, 16384
 
 # Remove space for the boot sector and other metadata
 $MetadataAtFrontOfDiskSizeInMebibytes = 2
@@ -201,7 +201,7 @@ d-i grub-installer/bootdev  string /dev/sda
 ### Finishing up the installation
 d-i finish-install/keep-consoles boolean true
 d-i finish-install/reboot_in_progress note
-d-i debian-installer/exit/poweroff boolean true
+d-i debian-installer/exit/poweroff boolean false
 
 #### Advanced options
-d-i preseed/late_command string cp /cdrom/late_command.sh /target/tmp/late_command.sh && in-target parted /dev/sda $PartedLateCommands && in-target chmod +x /tmp/late_command.sh && in-target /tmp/late_command.sh"
+d-i preseed/late_command string cp /cdrom/rc.local /target/etc/rc.local && cp /cdrom/install_pve.sh /target/root/install_pve.sh && cp /cdrom/late_command.sh /target/tmp/late_command.sh && in-target parted /dev/sda $PartedLateCommands && in-target chmod +x /etc/rc.local /root/install_pve.sh /tmp/late_command.sh && in-target /tmp/late_command.sh"

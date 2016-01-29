@@ -1,5 +1,5 @@
 ﻿@{
-    Name = 'example-jessie-tiny-amd64';
+    Name = 'example-proxmoxve-tiny-amd64';
     # Optional. Default: 360
     MemorySizeInMebibytes = 2048;
 
@@ -17,13 +17,13 @@
 
     Disks = @(
         @{
-            # Optional. Default: 4096
-            SizeInMebibytes = 4096;
+            # Optional. Default: 16384
+            SizeInMebibytes = 16384;
             # Optional. Default: <none>
             BiosBootPartitionName = 'grub';
             Partitions = @(
                 @{
-                    SizeInMebibytes = 2560;
+                    SizeInMebibytes = 4096;
                     Type = 'filesystem';
                     # Optional. Default: 'ext4'
                     FilesystemCode = 'ext4';
@@ -37,27 +37,27 @@
                     Label = 'host';
                 },
                 @{
-                    SizeInMebibytes = 512;
+                    SizeInMebibytes = 2048;
                     Type = 'swap';
                     # Optional. Default: <none>
                     PartitionName = 'swap';
                 },
                 @{
-                    SizeInMebibytes = 1021;
+                    SizeInMebibytes = 10237;
                     Type = 'empty';
                     # Optional. Default: <none>
-                    PartitionName = 'empty';
+                    PartitionName = 'firstpool';
                 }
             );
         },
         @{
-            # Optional. Default: 4096
-            SizeInMebibytes = 4096;
+            # Optional. Default: 16384
+            SizeInMebibytes = 16384;
         }
     );
 
-    IsoUrl = 'http://cdimage.debian.org/debian-cd/8.2.0/amd64/iso-cd/debian-8.2.0-amd64-netinst.iso';
-    IsoSha512 = '923cd1bfbfa62d78aecaa92d919ee54a95c8fca834b427502847228cf06155e7243875f59279b0bf6bfd1b579cbe2f1bc80528a265dafddee9a9d2a197ef3806';
+    IsoUrl = 'http://cdimage.debian.org/debian-cd/8.3.0/amd64/iso-cd/debian-8.3.0-amd64-netinst.iso';
+    IsoSha512 = '070db3644c39374fdc87fd3de51388dcc0e05b866eaf37f2193d1818f0128e938c42e4eb9f1de555741c143a51edee07903a33271fca2696a771e4ae5c868277';
 
     # Optional. Default: US
     CountryCode = 'US';
