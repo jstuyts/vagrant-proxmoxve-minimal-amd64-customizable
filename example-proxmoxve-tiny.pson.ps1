@@ -56,8 +56,8 @@
         }
     );
 
-    IsoUrl = 'http://cdimage.debian.org/debian-cd/8.3.0/amd64/iso-cd/debian-8.3.0-amd64-netinst.iso';
-    IsoSha512 = '070db3644c39374fdc87fd3de51388dcc0e05b866eaf37f2193d1818f0128e938c42e4eb9f1de555741c143a51edee07903a33271fca2696a771e4ae5c868277';
+    IsoUrl = 'http://cdimage.debian.org/debian-cd/8.4.0/amd64/iso-cd/debian-8.4.0-amd64-netinst.iso';
+    IsoSha512 = 'e51200021d0356f6dc84e2307218c56230c7f539634be6ffb243971e93b9d37fc63c7cec9ba58fcf0f970a89733f86d8c71e4b18e5045351536cc36aef4f261b';
 
     # Optional. Default: US
     CountryCode = 'US';
