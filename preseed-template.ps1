@@ -4,7 +4,7 @@ param
   )
 
 $NamesOfPackagesToInstallForGuestAdditions = ''
-if ( $Data.InstallGuestAddtions )
+if ( $Data.InstallGuestAdditions )
   {
   $NamesOfPackagesToInstallForGuestAdditions = 'build-essential linux-headers-amd64 virtualbox-guest-dkms virtualbox-guest-utils'
   }

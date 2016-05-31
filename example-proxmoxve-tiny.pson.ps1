@@ -13,7 +13,7 @@
     # it is best to prevent the "vagrant-vbguest" plug-in from trying to
     # upgrade the guest additions. Add the following to your "Vagrantfile":
     #     config.vbguest.no_install = true
-    InstallGuestAddtions = $false;
+    InstallGuestAdditions = $false;
 
     Disks = @(
         @{
